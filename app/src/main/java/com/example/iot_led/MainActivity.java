@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
@@ -42,29 +43,30 @@ public class MainActivity extends AppCompatActivity {
         try {
             IMqttToken token = client.connect(options);
             token.setActionCallback(new IMqttActionListener() {
-                Button on = findViewById(R.id.buttonON);
-                Button off = findViewById(R.id.buttonOFF);
+                ImageButton ion = findViewById(R.id.imageButtonON);
+                ImageButton ioff = findViewById(R.id.imageButtonOFF);
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.e("file", "onSuccess: ");
-                    on.setOnClickListener(new View.OnClickListener() {
+                    ion.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            publish(client,"0");
-
+                            publish(client,"1");
+                            ion.setVisibility(View.GONE);
+                            ioff.setVisibility(View.VISIBLE);
                         }
                     });
-                    off.setOnClickListener(new View.OnClickListener() {
+                    ioff.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            publish(client, "1");
-
+                            publish(client, "0");
+                            ioff.setVisibility(View.GONE);
+                            ion.setVisibility(View.VISIBLE);
                         }
                     });
 
 
                     client.setCallback(new MqttCallback() {
-                        TextView textView = findViewById(R.id.textView);
                         @Override
                         public void connectionLost(Throwable cause) {
 
@@ -73,12 +75,16 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void messageArrived(String topic, MqttMessage message) throws Exception {
                             Log.e("file", "messageArrived: "+message.toString() );
-                            textView.setText("The led is currently "+ message.toString());
+
                         }
 
                         @Override
                         public void deliveryComplete(IMqttDeliveryToken token) {
-                            Log.e("file","message delivered");
+                            try {
+                                Log.e("file","message delivered "+token.getMessage().toString());
+                            } catch (MqttException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
                 }
