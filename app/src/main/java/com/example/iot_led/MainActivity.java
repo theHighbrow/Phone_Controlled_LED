@@ -26,22 +26,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button buttonON = findViewById(R.id.buttonON);
-        Button buttonOFF = findViewById(R.id.buttonOFF);
-        buttonON.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                connect("on");
-            }
-        });
-        buttonOFF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                connect("off");
-            }
-        });
+       connect();
     }
-    public void connect(final String state)
+    public void connect()
     {
         String clientId = MqttClient.generateClientId();
         final MqttAndroidClient client = new MqttAndroidClient(this.getApplicationContext(),"tcp://soldier.cloudmqtt.com:16923",clientId);
@@ -55,15 +42,27 @@ public class MainActivity extends AppCompatActivity {
         try {
             IMqttToken token = client.connect(options);
             token.setActionCallback(new IMqttActionListener() {
+                Button on = findViewById(R.id.buttonON);
+                Button off = findViewById(R.id.buttonOFF);
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.e("file", "onSuccess: ");
-                    if (state.equals("on")){
-                        publish(client,"0");
-                    }
-                    if (state.equals("off")) {
-                        publish(client, "1");
-                    }
+                    on.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            publish(client,"0");
+
+                        }
+                    });
+                    off.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            publish(client, "1");
+
+                        }
+                    });
+
+
                     client.setCallback(new MqttCallback() {
                         TextView textView = findViewById(R.id.textView);
                         @Override
